@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #ball {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: red;
+      position: absolute;
+      cursor: pointer;
+    }
+    .droppable {
+      width: 100px;
+      height: 100px;
+      border: 2px dashed #000;
+      margin: 20px;
+    }
+    .highlight {
+      border-color: green;
+    }
+  </style>
+  <title>Drag'n'Drop Example</title>
+</head>
+<body>
+  <div id="ball"></div>
+  <div class="droppable" id="goal"></div>
+
+  <script>
+    let ball = document.getElementById('ball');
+    let goal = document.getElementById('goal');
+
+    ball.onmousedown = function(event) {
+      let shiftX = event.clientX - ball.getBoundingClientRect().left;
+      let shiftY = event.clientY - ball.getBoundingClientRect().top;
+
+      ball.style.position = 'absolute';
+      ball.style.zIndex = 1000;
+      document.body.append(ball);
+
+      moveAt(event.pageX, event.pageY);
+
+      function moveAt(pageX, pageY) {
+        ball.style.left = pageX - shiftX + 'px';
+        ball.style.top = pageY - shiftY + 'px';
+      }
+
+      function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY);
+
+        ball.hidden = true;
+        let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+        ball.hidden = false;
+
+        if (!elemBelow) return;
+
+        let droppableBelow = elemBelow.closest('.droppable');
+
+        if (currentDroppable != droppableBelow) {
+          if (currentDroppable) {
+            leaveDroppable(currentDroppable);
+          }
+          currentDroppable = droppableBelow;
+          if (currentDroppable) {
+            enterDroppable(currentDroppable);
+          }
+        }
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+
+      ball.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        ball.onmouseup = null;
+      };
+    };
+
+    ball.ondragstart = function() {
+      return false;
+    };
+
+    let currentDroppable = null;
+
+    function enterDroppable(elem) {
+      elem.classList.add('highlight');
+    }
+
+    function leaveDroppable(elem) {
+      elem.classList.remove('highlight');
+    }
+  </script>
+</body>
+</html>
